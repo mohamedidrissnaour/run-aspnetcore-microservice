@@ -5,6 +5,22 @@ using BuildingBlocks.Messaging.MassTransit;
 
 var builder = WebApplication.CreateBuilder(args);
 
+//discovery service
+//---------------------------------
+var consulClient = app.Services.GetRequiredService<IConsulClient>();
+var registration = new AgentServiceRegistration()
+{
+    ID = "catalog-api-1", //identifiant unique du service
+    Name = "catalog.api", //nom du service
+    Address = "catalog.api", // nom du container Docker pour que les autres services le voient
+    Port = 8080 //port interne exposé dans Docker 
+};
+
+await consulClient.Agent.ServiceRegister(registration);
+//-----------------------------------
+
+
+
 // Add services to the container.
 
 //Application Services

@@ -1,7 +1,17 @@
+using Consul;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
+
+//-----------------------------------
+//service de discovery service consul
+builder.Services.AddSingleton<IConsulClient, ConsulClient>(p => new ConsulClient(cfg =>
+{
+    cfg.Address = new Uri("http://consul:8500"); //adresse du serveur Consul dans docker
+}));
+//-----------------------------------
+
 
 // Add services to the container.
 var assembly = typeof(Program).Assembly;
@@ -40,5 +50,22 @@ app.UseHealthChecks("/health",
     {
         ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
     });
+
+
+
+//discovery service
+//---------------------------------
+var consulClient = app.Services.GetRequiredService<IConsulClient>();
+var registration = new AgentServiceRegistration()
+{
+    ID = "catalog-api-1", //identifiant unique du service
+    Name = "catalog.api", //nom du service
+    Address = "catalog.api", // nom du container Docker pour que les autres services le voient
+    Port = 8080 //port interne exposé dans Docker 
+};
+
+await consulClient.Agent.ServiceRegister(registration);
+//-----------------------------------
+
 
 app.Run();

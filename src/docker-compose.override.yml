@@ -1,4 +1,3 @@
-version: '3.4'
 
 services:
   catalogdb:
@@ -11,7 +10,7 @@ services:
     ports:
         - "5432:5432"
     volumes:
-      - postgres_catalog:/var/lib/postgresql/data/ 
+      - postgres_catalog:/var/lib/postgresql
       
   basketdb:
     container_name: basketdb
@@ -23,7 +22,7 @@ services:
     ports:
         - "5433:5432"
     volumes:
-      - postgres_basket:/var/lib/postgresql/data/ 
+      - postgres_basket:/var/lib/postgresql
 
   distributedcache:
     container_name: distributedcache
@@ -137,6 +136,15 @@ services:
     volumes:
       - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
       - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+
+
+  consul:
+    image: consul:1.15.4 
+    container_name: consul
+    ports:
+      - "8500:8500"
+      - "8600:8600/udp"
+    command: "agent -dev -client=0.0.0.0"
 
   shopping.web:
     environment:
